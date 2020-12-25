@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
-
-const Runes = () => {
+import { useFirestore } from "reactfire";
+const Runes = ({ champion }) => {
   let [runes, setRunes] = useState(undefined);
 
-  let [selectedGroup, setSelectedGroup] = useState(-1);
+  let [firstSelectedGroup, setFirstSelectedGroup] = useState(-1);
+  let [secondSelectedGroup, setSecondSelectedGroup] = useState(-1);
+
+  const firestore = useFirestore();
 
   const loadJson = async () => {
     let ris = await fetch(
@@ -13,25 +16,55 @@ const Runes = () => {
     let data = await ris.json();
 
     setRunes(data);
-    setSelectedGroup(0);
+    setFirstSelectedGroup(0);
+    setSecondSelectedGroup(0);
     console.log(data);
+  };
+
+  const addToDatabase = () => {
+    let firstGroup = document.getElementsByClassName("firstGroup");
+    let secondGroup = document.getElementsByClassName("secondGroup");
+
+    let principale = [...firstGroup].map((html) => {
+      let a = html.options[html.selectedIndex].value;
+      return a;
+    });
+
+    let secondario = [...secondGroup].map((html) => {
+      let a = html.options[html.selectedIndex].value;
+      return a;
+    });
+
+    let princ = { Rune: principale, nome: runes[firstSelectedGroup].name };
+    let second = { Rune: secondario, nome: runes[secondSelectedGroup].name };
+
+    if (!champion || !champion.id) {
+      alert("No champion");
+      return;
+    }
+
+    firestore
+      .collection("Campioni")
+      .doc(champion.id)
+      .collection("Runes")
+      .add({ principale: princ, secondaria: second });
   };
 
   useEffect(() => {
     loadJson();
   }, []);
 
-  if (!runes || selectedGroup === -1) {
+  if (!runes || firstSelectedGroup === -1 || secondSelectedGroup === -1) {
     return <div>Loading runes...</div>;
   }
 
   return (
     <div>
       <h1>Runes</h1>
-      <h3>{runes.length}</h3>
+
       <select
         onChange={(e) => {
-          setSelectedGroup(e.target.selectedIndex);
+          setFirstSelectedGroup(e.target.selectedIndex);
         }}
       >
         {runes.map((runa) => {
@@ -40,10 +73,10 @@ const Runes = () => {
       </select>
 
       <div>
-        {runes[selectedGroup].slots.map((slot) => {
+        {runes[firstSelectedGroup].slots.map((slot) => {
           return (
             <div>
-              <select>
+              <select className="firstGroup">
                 {slot.runes.map((r) => {
                   return <option value={r.key}>{r.name}</option>;
                 })}
@@ -52,6 +85,32 @@ const Runes = () => {
           );
         })}
       </div>
+      <div style={{ height: "20px" }}></div>
+
+      <select
+        onChange={(e) => {
+          setSecondSelectedGroup(e.target.selectedIndex);
+        }}
+      >
+        {runes.map((runa) => {
+          return <option value={runa.key}>{runa.name}</option>;
+        })}
+      </select>
+
+      <div>
+        {runes[secondSelectedGroup].slots.map((slot) => {
+          return (
+            <div>
+              <select className="secondGroup">
+                {slot.runes.map((r) => {
+                  return <option value={r.key}>{r.name}</option>;
+                })}
+              </select>
+            </div>
+          );
+        })}
+      </div>
+      <button onClick={addToDatabase}>Add to database</button>
     </div>
   );
 };

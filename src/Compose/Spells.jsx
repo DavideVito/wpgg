@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import { useFirestore } from "reactfire";
 
 const Spells = ({ champion }) => {
-  console.log(champion);
-
   let [spells, setSpells] = useState([]);
   let [currentLevel, setCurrentLevel] = useState(1);
   let [abilitaLivelli, setAbilitaLivelli] = useState([]);
