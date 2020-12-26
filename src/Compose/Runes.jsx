@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useFirestore } from "reactfire";
 const Runes = ({ champion }) => {
   let [runes, setRunes] = useState(undefined);
+  let [secondary, setSecondary] = useState(undefined);
 
   let [firstSelectedGroup, setFirstSelectedGroup] = useState(-1);
   let [secondSelectedGroup, setSecondSelectedGroup] = useState(-1);
@@ -18,7 +19,22 @@ const Runes = ({ champion }) => {
     setRunes(data);
     setFirstSelectedGroup(0);
     setSecondSelectedGroup(0);
-    console.log(data);
+
+    let d = data.map((runa) => {
+      let slots = [
+        ...runa.slots[1].runes,
+        ...runa.slots[2].runes,
+        ...runa.slots[3].runes,
+      ];
+
+      let ogg = { ...runa, slots };
+
+      return ogg;
+    });
+
+    setSecondary(d);
+
+    console.log({ data, d });
   };
 
   const addToDatabase = () => {
@@ -35,8 +51,8 @@ const Runes = ({ champion }) => {
       return a;
     });
 
-    let princ = { Rune: principale, nome: runes[firstSelectedGroup].name };
-    let second = { Rune: secondario, nome: runes[secondSelectedGroup].name };
+    let princ = { Rune: principale, nome: runes[firstSelectedGroup].key };
+    let second = { Rune: secondario, nome: runes[secondSelectedGroup].key };
 
     if (!champion || !champion.id) {
       alert("No champion");
@@ -54,7 +70,12 @@ const Runes = ({ champion }) => {
     loadJson();
   }, []);
 
-  if (!runes || firstSelectedGroup === -1 || secondSelectedGroup === -1) {
+  if (
+    !runes ||
+    firstSelectedGroup === -1 ||
+    secondSelectedGroup === -1 ||
+    !secondary
+  ) {
     return <div>Loading runes...</div>;
   }
 
@@ -92,18 +113,18 @@ const Runes = ({ champion }) => {
           setSecondSelectedGroup(e.target.selectedIndex);
         }}
       >
-        {runes.map((runa) => {
+        {secondary.map((runa) => {
           return <option value={runa.key}>{runa.name}</option>;
         })}
       </select>
 
       <div>
-        {runes[secondSelectedGroup].slots.map((slot) => {
+        {[1, 2].map((_) => {
           return (
             <div>
-              <select className="secondGroup">
-                {slot.runes.map((r) => {
-                  return <option value={r.key}>{r.name}</option>;
+              <select className={`secondGroup`}>
+                {secondary[secondSelectedGroup].slots.map((slot) => {
+                  return <option value={slot.key}>{slot.name}</option>;
                 })}
               </select>
             </div>

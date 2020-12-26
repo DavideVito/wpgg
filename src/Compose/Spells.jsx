@@ -2,10 +2,14 @@ import { useState, useEffect } from "react";
 import { useFirestore } from "reactfire";
 
 const Spells = ({ champion }) => {
-  let [spells, setSpells] = useState([]);
+  let [spells, setSpells] = useState(undefined);
   let [currentLevel, setCurrentLevel] = useState(1);
   let [abilitaLivelli, setAbilitaLivelli] = useState([]);
   const firestore = useFirestore();
+
+  useEffect(() => {
+    setSpells(champion.spellsObject);
+  }, []);
 
   const confermaAbilita = () => {
     firestore
@@ -48,29 +52,57 @@ const Spells = ({ champion }) => {
     setCurrentLevel(currentLevel + 1);
   };
 
+  if (!spells) {
+    return <div>Loading spells..</div>;
+  }
+
   return (
     <>
       <div>
         {champion.spells.map((spell) => {
           return (
-            <div
-              key={spell.id}
-              onClick={() => {
-                aggiungiAbilita(spell.id);
-              }}
-            >
-              {spell.name}
+            <div>
+              <img
+                onClick={() => {
+                  aggiungiAbilita(spell.id);
+                }}
+                style={{ cursor: "pointer" }}
+                key={spell.id}
+                src={`http://ddragon.leagueoflegends.com/cdn/10.25.1/img/spell/${spell.image.full}`}
+                alt=""
+              />
+              <div key={spell.id}>{spell.name}</div>
             </div>
           );
         })}
       </div>
 
       <div>
-        <h1>Abilita per ogni livello madonna troia</h1>
-        {abilitaLivelli.map((ab) => {
+        <h1>
+          Abilita per ogni livello, clicca su uno per cavarlo e buttarlo via nel
+          cestino senza pieta, lasciandolo sofferente nell'oblio come la
+          signorina <a href="https://lvtl.tk/050ef636">Giulia Scarano </a>
+        </h1>
+        {abilitaLivelli.map((ab, index) => {
           return (
             <div key={ab.livello}>
-              {ab.livello} {ab.spell}
+              <div>
+                <img
+                  onClick={() => {
+                    abilitaLivelli.splice(index, 1);
+                    let a = [...abilitaLivelli];
+
+                    setCurrentLevel(currentLevel - 1);
+                    setAbilitaLivelli(a);
+                  }}
+                  style={{ cursor: "pointer" }}
+                  key={`${spells[ab.spell].id}${Math.random()}`}
+                  src={`http://ddragon.leagueoflegends.com/cdn/10.25.1/img/spell/${
+                    spells[ab.spell].image.full
+                  }`}
+                  alt=""
+                />
+              </div>
             </div>
           );
         })}

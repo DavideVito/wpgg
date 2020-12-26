@@ -74,6 +74,11 @@ const Compose = () => {
       </div>
       <div>{championName}</div>
 
+      <h1>
+        Madonna stronza ricordati di premere invia in tutti sennò succede un
+        casino
+      </h1>
+
       {champion && (
         <div>
           <Spells champion={champion} />
