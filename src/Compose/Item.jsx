@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useFirestore } from "reactfire";
+import { useFirestore, useFirestoreCollectionData } from "reactfire";
 import DebounceInput from "react-debounce-input";
 
 const Items = ({ champion }) => {
@@ -23,6 +23,27 @@ const Items = ({ champion }) => {
   useEffect(() => {
     loadItemsJson();
   }, []);
+
+  const rimuoviDaDatabase = (id) => {
+    console.log(id);
+    firestore
+      .collection("Campioni")
+      .doc(champion.name)
+      .collection("Items")
+      .doc(id)
+      .delete();
+  };
+
+  let ref = firestore
+    .collection("Campioni")
+    .doc(champion.name)
+    .collection("Items");
+
+  let dbItems = useFirestoreCollectionData(ref);
+
+  useEffect(() => {
+    if (dbItems.data) setSelectedItems(dbItems.data);
+  }, [dbItems.hasEmitted]);
 
   const addItem = (item) => {
     let a = [...selectedItems, item];
@@ -62,9 +83,13 @@ const Items = ({ champion }) => {
         .collection("Campioni")
         .doc(champion.id)
         .collection("Items")
-        .add({ id: id });
+        .add({ id: id, ...item });
     });
   };
+
+  if (dbItems.status === "loading") {
+    return <div>Loading items...</div>;
+  }
 
   return (
     <>
@@ -99,7 +124,6 @@ const Items = ({ champion }) => {
         <h1>Added items, clicca per rimuovere </h1>
         <div>Item selected: {selectedItems.length}</div>
         {selectedItems.map((item, index) => {
-          console.log(item);
           return (
             <div>
               <img
@@ -107,6 +131,10 @@ const Items = ({ champion }) => {
                 src={`http://ddragon.leagueoflegends.com/cdn/10.25.1/img/item/${item.image.full}`}
                 alt={item.name}
                 onClick={() => {
+                  if (item.NO_ID_FIELD) {
+                    rimuoviDaDatabase(item.NO_ID_FIELD);
+                  }
+
                   selectedItems.splice(index, 1);
                   let a = [...selectedItems];
 

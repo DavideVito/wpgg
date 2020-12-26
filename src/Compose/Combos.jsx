@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DebounceInput from "react-debounce-input";
 
-import { useFirestore } from "reactfire";
+import { useFirestore, useFirestoreCollectionData } from "reactfire";
 
 const Combos = ({ champion }) => {
   const firestore = useFirestore();
@@ -18,6 +18,18 @@ const Combos = ({ champion }) => {
     setCombos(a);
   };
 
+  console.log(champion.name);
+
+  const ref = firestore
+    .collection("Campioni")
+    .doc(champion.name)
+    .collection("Combo");
+
+  let combo = useFirestoreCollectionData(ref);
+  useEffect(() => {
+    if (combo.data) setCombos(combo.data);
+  }, [combo.hasEmitted]);
+
   const pushToDatabase = () => {
     if (!champion || !champion.id) {
       alert("No champion");
@@ -31,6 +43,10 @@ const Combos = ({ champion }) => {
         .add({ name: combo.name, video: combo.video });
     });
   };
+
+  if (combo.status === "loading") {
+    <div>Loading combos</div>;
+  }
 
   return (
     <>

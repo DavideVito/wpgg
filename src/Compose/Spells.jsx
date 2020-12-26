@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useFirestore } from "reactfire";
+import { useFirestore, useFirestoreCollectionData } from "reactfire";
 
 const Spells = ({ champion }) => {
   let [spells, setSpells] = useState(undefined);
@@ -10,6 +10,17 @@ const Spells = ({ champion }) => {
   useEffect(() => {
     setSpells(champion.spellsObject);
   }, []);
+
+  let ref = firestore
+    .collection("Campioni")
+    .doc(champion.name)
+    .collection("Abilities");
+
+  let dbItems = useFirestoreCollectionData(ref);
+
+  useEffect(() => {
+    if (dbItems.data) setAbilitaLivelli(dbItems.data);
+  }, [dbItems.hasEmitted]);
 
   const confermaAbilita = () => {
     firestore
@@ -34,7 +45,11 @@ const Spells = ({ champion }) => {
         .collection("Campioni")
         .doc(champion.id)
         .collection("Abilities")
-        .add({ level: abilita.livello, name: abilita.spell });
+        .add({
+          level: abilita.livello,
+          name: abilita.spell,
+          spell: abilita.spell,
+        });
     });
   };
 
@@ -52,7 +67,16 @@ const Spells = ({ champion }) => {
     setCurrentLevel(currentLevel + 1);
   };
 
-  if (!spells) {
+  const rimuoviDaDatabase = (id) => {
+    console.log(id);
+    firestore
+      .collection("Campioni")
+      .doc(champion.name)
+      .collection("Abilities")
+      .doc(id)
+      .delete();
+  };
+  if (!spells || !abilitaLivelli) {
     return <div>Loading spells..</div>;
   }
 
@@ -89,6 +113,9 @@ const Spells = ({ champion }) => {
               <div>
                 <img
                   onClick={() => {
+                    if (ab.NO_ID_FIELD) {
+                      rimuoviDaDatabase(ab.NO_ID_FIELD);
+                    }
                     abilitaLivelli.splice(index, 1);
                     let a = [...abilitaLivelli];
 
