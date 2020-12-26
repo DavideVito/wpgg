@@ -114,6 +114,9 @@ const Runes = ({ champion }) => {
         }}
       >
         {secondary.map((runa) => {
+          if (runes[firstSelectedGroup].key === runa.key) {
+            return <></>;
+          }
           return <option value={runa.key}>{runa.name}</option>;
         })}
       </select>
