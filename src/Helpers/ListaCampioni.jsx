@@ -1,12 +1,18 @@
 import React from "react";
 
 import "firebase/firestore";
-import { useFirestore, useFirestoreCollectionData } from "reactfire";
+import {
+  useFirestore,
+  useFirestoreCollectionData,
+  useAnalytics,
+} from "reactfire";
 
 import { Link } from "react-router-dom";
 
 const ListaCampioni = () => {
   let firestore = useFirestore();
+
+  useAnalytics();
 
   let ref = firestore.collection("Campioni");
 

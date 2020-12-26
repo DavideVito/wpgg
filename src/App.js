@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 
 import Compose from "./Compose/Compose";
 import ListaCampioni from "./Helpers/ListaCampioni";
@@ -20,7 +20,9 @@ function App() {
           </Route>
 
           <Route path="/">
-            <ListaCampioni />
+            <Suspense fallback="loading">
+              <ListaCampioni />
+            </Suspense>
           </Route>
         </Switch>
       </Router>
