@@ -79,36 +79,40 @@ const Items = ({ champion }) => {
         {searchedItems.map((item) => {
           return (
             <div>
-              <div>{item.name}</div>
-              <button
-                onClick={() => {
-                  addItem(item);
-                }}
-              >
-                Aggiungi
-              </button>
+              <div>
+                <div>{item.name}</div>
+                <img
+                  style={{ cursor: "pointer" }}
+                  src={`http://ddragon.leagueoflegends.com/cdn/10.25.1/img/item/${item.image.full}`}
+                  alt={item.name}
+                  onClick={() => {
+                    addItem(item);
+                  }}
+                />
+              </div>
             </div>
           );
         })}
       </div>
 
       <div>
-        <h1>Added items</h1>
+        <h1>Added items, clicca per rimuovere </h1>
         <div>Item selected: {selectedItems.length}</div>
         {selectedItems.map((item, index) => {
+          console.log(item);
           return (
             <div>
-              {item.name}{" "}
-              <button
+              <img
+                style={{ cursor: "pointer" }}
+                src={`http://ddragon.leagueoflegends.com/cdn/10.25.1/img/item/${item.image.full}`}
+                alt={item.name}
                 onClick={() => {
                   selectedItems.splice(index, 1);
                   let a = [...selectedItems];
 
                   setSelectedItems(a);
                 }}
-              >
-                Rimuovi
-              </button>
+              />
             </div>
           );
         })}
