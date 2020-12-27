@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useFirestore } from "reactfire";
-const Runes = ({ champion }) => {
+const Runes = ({ champion, role }) => {
   let [runes, setRunes] = useState(undefined);
   let [secondary, setSecondary] = useState(undefined);
 
@@ -59,11 +59,14 @@ const Runes = ({ champion }) => {
       return;
     }
 
+    let o = { principale: princ, secondaria: second };
+
     firestore
       .collection("Campioni")
       .doc(champion.id)
-      .collection("Runes")
-      .add({ principale: princ, secondaria: second });
+      .collection("Roles")
+      .doc(role)
+      .set({ runes: o }, { merge: true });
   };
 
   useEffect(() => {

@@ -1,21 +1,13 @@
-import { useFirestore, useFirestoreCollectionData } from "reactfire";
+import {
+  useFirestore,
+  useFirestoreCollectionData,
+  useFirestoreDocDataOnce,
+} from "reactfire";
 
 import ReactTooltip from "react-tooltip";
 
-const Abilities = ({ name, spells }) => {
-  const firestore = useFirestore();
-
-  const abilitiesRef = firestore
-    .collection("Campioni")
-    .doc(name)
-    .collection("Abilities")
-    .orderBy("level", "asc");
-
-  const abilities = useFirestoreCollectionData(abilitiesRef);
-
-  if (abilities.status === "loading") {
-    return <div>Loading {name} abilities...</div>;
-  }
+const Abilities = ({ name, spells, abilities }) => {
+  console.log(abilities);
 
   return (
     <div>
@@ -31,7 +23,7 @@ const Abilities = ({ name, spells }) => {
         })}
       </div>
 
-      {abilities.data.map((abilita) => {
+      {abilities.map((abilita) => {
         return (
           <div key={abilita.NO_ID_FIELD}>
             <div></div>

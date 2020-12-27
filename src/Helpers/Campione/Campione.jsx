@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
+import { useFirestore } from "reactfire";
 import Runes from "./Runes";
 import Abilities from "./Abilities";
 import Items from "./Items";
@@ -10,7 +11,25 @@ const Campione = () => {
   let { id } = useParams();
 
   let [campione, setCampione] = React.useState(undefined);
+  let [dbData, setDbData] = React.useState(undefined);
   let [counter, setCounter] = React.useState(0);
+  let [selectedRole, setSelectedRole] = useState(undefined);
+
+  const firestore = useFirestore();
+
+  useEffect(() => {
+    if (!selectedRole) return;
+
+    firestore
+      .collection("Campioni")
+      .doc(id)
+      .collection("Roles")
+      .doc(selectedRole)
+      .get()
+      .then((snapshot) => {
+        setDbData(snapshot.data());
+      });
+  }, [selectedRole]);
 
   const loadJson = async () => {
     let userLang = navigator.language || navigator.userLanguage;
@@ -45,9 +64,14 @@ const Campione = () => {
 
   React.useEffect(() => {
     loadJson();
+    setSelectedRole(window.roles[0]);
   }, []);
 
   if (!campione) {
+    return <div>Loading...</div>;
+  }
+
+  if (!dbData) {
     return <div>Loading...</div>;
   }
 
@@ -68,31 +92,51 @@ const Campione = () => {
       >
         Next Skin
       </button>
+      <select
+        onChange={(e) => {
+          let a = e.target.options[e.target.selectedIndex].value;
+          setSelectedRole(a);
+        }}
+      >
+        {window.roles.map((role) => {
+          return (
+            <option value={role} key={role}>
+              {window.capitalizeFirstLetter(role)}
+            </option>
+          );
+        })}
+      </select>
       <div>
         <div>
           <h1>Abilities</h1>
         </div>
-        <Abilities name={id} spells={campione.spells} />
+        <Abilities
+          name={id}
+          spells={campione.spells}
+          role={selectedRole}
+          abilities={dbData.abilities}
+        />
       </div>
 
       <div>
         <div>
           <h1>Combos</h1>
         </div>
-        <Combos name={id} />
+        <Combos name={id} role={selectedRole} combos={dbData.combos} />
       </div>
 
       <div>
         <div>
           <h1>Runes</h1>
         </div>
-        <Runes name={id} />
+
+        <Runes name={id} role={selectedRole} runes={dbData.runes} />
       </div>
 
       <div>
         <div>
           <h1>Items</h1>
-          <Items name={id} />
+          <Items name={id} role={selectedRole} items={dbData.items} />
         </div>
       </div>
     </div>

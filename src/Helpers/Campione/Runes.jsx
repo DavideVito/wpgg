@@ -2,7 +2,7 @@ import { useFirestoreCollectionData, useFirestore } from "reactfire";
 
 import { useEffect, useState } from "react";
 
-const Runes = ({ name }) => {
+const Runes = ({ name, runes: champRunes, role }) => {
   let [runes, setRunes] = useState(undefined);
 
   const loadJson = async () => {
@@ -39,35 +39,30 @@ const Runes = ({ name }) => {
     loadJson();
   }, []);
 
-  const firestore = useFirestore();
-
-  const runesRef = firestore
-    .collection("Campioni")
-    .doc(name)
-    .collection("Runes");
-
-  const champRunes = useFirestoreCollectionData(runesRef);
-
-  if (typeof runes === "undefined" || champRunes.status === "loading") {
+  if (typeof runes === "undefined") {
     return <div>Loading runes....</div>;
   }
 
-  if (champRunes.data.length === 0) {
-    return <div></div>;
+  if (!champRunes) {
+    return (
+      <div>
+        No runes for {name} as {role}
+      </div>
+    );
   }
 
   return (
     <div>
       <div>
-        <div>{runes[champRunes.data[0].principale.nome].name}</div>
+        <div>{runes[champRunes.principale.nome].name}</div>
         <div>
-          {champRunes.data[0].principale.Rune.map((runaDb) => {
+          {champRunes.principale.Rune.map((runaDb) => {
             return (
               <div key={runaDb.NO_ID_FIELD}>
-                {runes[champRunes.data[0].principale.nome].rune[runaDb].name}
+                {runes[champRunes.principale.nome].rune[runaDb].name}
                 <img
                   src={`https://opgg-static.akamaized.net/images/lol/perk/${
-                    runes[champRunes.data[0].principale.nome].rune[runaDb].id
+                    runes[champRunes.principale.nome].rune[runaDb].id
                   }.png`}
                   alt=""
                 />
@@ -78,15 +73,15 @@ const Runes = ({ name }) => {
       </div>
 
       <div>
-        <div>{runes[champRunes.data[0].secondaria.nome].name}</div>
+        <div>{runes[champRunes.secondaria.nome].name}</div>
         <div>
-          {champRunes.data[0].secondaria.Rune.map((runaDb) => {
+          {champRunes.secondaria.Rune.map((runaDb) => {
             return (
               <div key={runaDb.NO_ID_FIELD}>
-                {runes[champRunes.data[0].secondaria.nome].rune[runaDb].name}
+                {runes[champRunes.secondaria.nome].rune[runaDb].name}
                 <img
                   src={`https://opgg-static.akamaized.net/images/lol/perk/${
-                    runes[champRunes.data[0].secondaria.nome].rune[runaDb].id
+                    runes[champRunes.secondaria.nome].rune[runaDb].id
                   }.png`}
                   alt=""
                 />

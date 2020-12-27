@@ -1,5 +1,11 @@
-import { useUser, useAuth } from "reactfire";
+import {
+  useUser,
+  useAuth,
+  useFirestore,
+  useFirestoreCollectionData,
+} from "reactfire";
 import { useState, useEffect } from "react";
+
 import firebase from "firebase";
 import DebounceInput from "react-debounce-input";
 
@@ -12,8 +18,11 @@ import Combos from "./Combos";
 const Compose = () => {
   let [championName, setChampionName] = useState("");
   let [champion, setChampion] = useState(undefined);
+  let [selectedRole, setSelectedRole] = useState(null);
 
   let auth = useAuth();
+
+  const firestore = useFirestore();
 
   const { data: user } = useUser();
 
@@ -57,7 +66,16 @@ const Compose = () => {
 
   useEffect(() => {
     loadChampJson();
+    setSelectedRole(window.roles[0]);
   }, [championName]);
+
+  useEffect(() => {
+    if (!champion) return;
+    firestore
+      .collection("Campioni")
+      .doc(champion.name)
+      .set({ roles: window.roles }, { merge: true });
+  }, [champion]);
 
   if (!user) {
     return <button onClick={signIn}>Accedi </button>;
@@ -81,10 +99,24 @@ const Compose = () => {
 
       {champion && (
         <div>
-          <Spells champion={champion} />
-          <Items champion={champion} />
-          <Combos champion={champion} />
-          <Runes champion={champion} />
+          <select
+            onChange={(e) => {
+              let a = e.target.options[e.target.selectedIndex].value;
+              setSelectedRole(a);
+            }}
+          >
+            {window.roles.map((role) => {
+              return (
+                <option value={role} key={role}>
+                  {window.capitalizeFirstLetter(role)}
+                </option>
+              );
+            })}
+          </select>
+          <Spells champion={champion} role={selectedRole} />
+          <Items champion={champion} role={selectedRole} />
+          <Combos champion={champion} role={selectedRole} />
+          <Runes champion={champion} role={selectedRole} />
         </div>
       )}
 

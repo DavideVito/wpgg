@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useFirestore, useFirestoreCollectionData } from "reactfire";
 import DebounceInput from "react-debounce-input";
 
-const Items = ({ champion }) => {
+const Items = ({ champion, role }) => {
   const firestore = useFirestore();
 
   let [items, setItems] = useState([]);
@@ -76,15 +76,17 @@ const Items = ({ champion }) => {
       alert("No champion");
       return;
     }
-    selectedItems.forEach((item) => {
+    let it = selectedItems.map((item) => {
       let id = item.image.full.split(".")[0];
-
-      firestore
-        .collection("Campioni")
-        .doc(champion.id)
-        .collection("Items")
-        .add({ id: id, ...item });
+      return id;
     });
+
+    firestore
+      .collection("Campioni")
+      .doc(champion.id)
+      .collection("Roles")
+      .doc(role)
+      .set({ items: it }, { merge: true });
   };
 
   if (dbItems.status === "loading") {

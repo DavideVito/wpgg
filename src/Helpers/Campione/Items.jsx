@@ -2,13 +2,12 @@ import { useFirestoreCollectionData, useFirestore } from "reactfire";
 
 import { useEffect, useState } from "react";
 
-const Items = ({ name }) => {
+const Items = ({ name, items: champItems, role }) => {
   let [items, setItems] = useState([]);
 
   const loadJson = async () => {
     let userLang = navigator.language || navigator.userLanguage;
     userLang = userLang.replace("-", "_");
-    console.log(userLang);
 
     let ris = await fetch(
       `http://ddragon.leagueoflegends.com/cdn/10.25.1/data/${userLang}/item.json`
@@ -25,28 +24,27 @@ const Items = ({ name }) => {
     loadJson();
   }, []);
 
-  const firestore = useFirestore();
-
-  const itemsRef = firestore
-    .collection("Campioni")
-    .doc(name)
-    .collection("Items");
-
-  const champItems = useFirestoreCollectionData(itemsRef);
-
-  if (items.length === 0 || champItems.status === "loading") {
+  if (items.length === 0) {
     return <div>Loading items....</div>;
+  }
+
+  if (!champItems) {
+    return (
+      <div>
+        No items for {name} as {role}
+      </div>
+    );
   }
 
   return (
     <div>
-      {champItems.data.map((item) => {
+      {champItems.map((item) => {
         return (
-          <div key={item.id}>
-            <div>Name: {items[item.id].name}</div>
+          <div key={`${item}${Math.random()}`}>
+            <div>Name: {items[item].name}</div>
             <img
-              src={`http://ddragon.leagueoflegends.com/cdn/10.25.1/img/item/${item.id}.png`}
-              alt={items[item.id].name}
+              src={`http://ddragon.leagueoflegends.com/cdn/10.25.1/img/item/${item}.png`}
+              alt={items[item].name}
             />
           </div>
         );

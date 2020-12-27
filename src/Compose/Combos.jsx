@@ -3,7 +3,7 @@ import DebounceInput from "react-debounce-input";
 
 import { useFirestore, useFirestoreCollectionData } from "reactfire";
 
-const Combos = ({ champion }) => {
+const Combos = ({ champion, role }) => {
   const firestore = useFirestore();
 
   let [combos, setCombos] = useState([]);
@@ -35,13 +35,16 @@ const Combos = ({ champion }) => {
       alert("No champion");
       return;
     }
-    combos.forEach((combo) => {
-      firestore
-        .collection("Campioni")
-        .doc(champion.id)
-        .collection("Combo")
-        .add({ name: combo.name, video: combo.video });
+
+    let r = combos.map((combo) => {
+      return { name: combo.name, video: combo.video };
     });
+    firestore
+      .collection("Campioni")
+      .doc(champion.id)
+      .collection("Roles")
+      .doc(role)
+      .set({ combos: r }, { merge: true });
   };
 
   if (combo.status === "loading") {

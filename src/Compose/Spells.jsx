@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useFirestore, useFirestoreCollectionData } from "reactfire";
 
-const Spells = ({ champion }) => {
+const Spells = ({ champion, role }) => {
   let [spells, setSpells] = useState(undefined);
   let [currentLevel, setCurrentLevel] = useState(1);
   let [abilitaLivelli, setAbilitaLivelli] = useState([]);
@@ -40,17 +40,22 @@ const Spells = ({ champion }) => {
       return;
     }
 
-    abilitaLivelli.forEach((abilita) => {
-      firestore
-        .collection("Campioni")
-        .doc(champion.id)
-        .collection("Abilities")
-        .add({
-          level: abilita.livello,
-          name: abilita.spell,
-          spell: abilita.spell,
-        });
+    let ab = abilitaLivelli.map((abilita) => {
+      let ogg = {
+        level: abilita.livello,
+        name: abilita.spell,
+        spell: abilita.spell,
+      };
+
+      return ogg;
     });
+
+    firestore
+      .collection("Campioni")
+      .doc(champion.id)
+      .collection("Roles")
+      .doc(role)
+      .set({ abilities: ab }, { merge: true });
   };
 
   const aggiungiAbilita = (spellId) => {
